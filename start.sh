@@ -1,5 +1,20 @@
 #!/bin/bash
 
+function open_DB() {
+# Open DB and if it doen't exist, create it
+
+}
+
+function get_names() {
+# Gets n Options from the DB
+
+}
+
+function write_decision() {
+# Add deciscion to DB
+
+}
+
 function present_options() {
 
 echo "[1] $1"
