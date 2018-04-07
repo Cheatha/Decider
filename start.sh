@@ -37,18 +37,20 @@ function create_db() {
 # Open DB and if it doen't exist, create it
 if [ ! -f $db ]; then
 	echo "Database not found!"
-	sql "create table names (id INTEGER PRIMARY KEY,name TEXT,vote INTEGER,compared INTEGER);"
-##else
-##	sqlite3 -batch $db "select * from names"
+	sql "create table names (id INTEGER PRIMARY KEY,name TEXT UNIQUE,vote INTEGER,compared INTEGER);"
+else
+sql "select * from names"
 fi
 }
 
 function add_name() {
 	echo "Add Name $1"
+	sql "insert into names (name,vote,compared) values (\"$1\",0,0);"
 }
 
 function remove_name() {
 	echo "Remove Name $1"
+	sql "delete from names where name=\"$1\""
 }
 
 function get_names() {
