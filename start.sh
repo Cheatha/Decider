@@ -1,4 +1,9 @@
 #!/bin/bash
+# Enable unofficial bash strict mode
+# More info: http://redsymbol.net/articles/unofficial-bash-strict-mode/
+set -euo pipefail
+IFS=$'\n\t'
+
 # Config
 db_name="names.db"
 db_path=$(dirname "$0")
