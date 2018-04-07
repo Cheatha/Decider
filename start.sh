@@ -29,11 +29,15 @@ function check_input() {
 		esac
 }
 
+function sql() {
+	sqlite3 -batch $db "$@"
+}
+
 function create_db() {
 # Open DB and if it doen't exist, create it
 if [ ! -f $db ]; then
 	echo "Database not found!"
-	sqlite3 -batch $db "create table names (id INTEGER PRIMARY KEY,name TEXT,vote INTEGER,compared INTEGER);"
+	sql "create table names (id INTEGER PRIMARY KEY,name TEXT,vote INTEGER,compared INTEGER);"
 ##else
 ##	sqlite3 -batch $db "select * from names"
 fi
