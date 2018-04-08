@@ -42,8 +42,6 @@ function create_db() {
 if [ ! -f $db ]; then
 	echo "Database not found!"
 	sql "create table names (id INTEGER PRIMARY KEY,name TEXT UNIQUE,vote INTEGER,compared INTEGER);"
-else
-sql "select * from names"
 fi
 }
 
@@ -108,6 +106,9 @@ function read_decision() {
 
 
 create_db
+echo "---Debug: Show all Names"
+sql "select * from names"
+echo "---"
 check_input
 #present_options foo bar
 #read_decision
