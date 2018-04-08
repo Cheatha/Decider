@@ -84,7 +84,8 @@ function sanitize() {
 	lowercase=$(echo "$1"|tr '[:upper:]' '[:lower:]')
 	trimmed=$(echo "$lowercase"|tr -d '[:blank:]')
 	alpha=$(echo "$trimmed"|tr -cd  '[:alpha:]')
-	echo "$alpha"
+    capitalize="$(tr '[:lower:]' '[:upper:]' <<< ${alpha:0:1})${alpha:1}"
+	echo "$capitalize"
 }
 
 function get_names() {
