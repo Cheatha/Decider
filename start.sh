@@ -26,6 +26,10 @@ function check_input() {
 			# Remove name
 			remove_name $option
 		;;
+		print)
+			# Show DB entries
+			print_db
+		;;
 		start|*)
 			# Start decider
 			echo "start decider"
@@ -34,7 +38,7 @@ function check_input() {
 }
 
 function sql() {
-	sqlite3 -batch $db "$@"
+	sqlite3 -batch -line $db "$@"
 }
 
 function create_db() {
@@ -104,11 +108,12 @@ function read_decision() {
 	read -n 1 decision
 }
 
+function print_db() {
+	sql "select name,vote,compared from names"
+}
+
 
 create_db
-echo "---Debug: Show all Names"
-sql "select * from names"
-echo "---"
 check_input
 #present_options foo bar
 #read_decision
