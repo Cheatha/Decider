@@ -48,13 +48,15 @@ fi
 }
 
 function add_name() {
-	echo "Add Name $1"
-	sql "insert into names (name,vote,compared) values (\"$1\",0,0);"
+	name=$(sanitize $1)
+	echo "Add Name $name"
+	sql "insert into names (name,vote,compared) values (\"$name\",0,0);"
 }
 
 function remove_name() {
-	echo "Remove Name $1"
-	sql "delete from names where name=\"$1\""
+	name=$(sanitize $1)
+	echo "Remove Name $name"
+	sql "delete from names where name=\"$name\""
 }
 
 function batch_add() {
@@ -71,9 +73,16 @@ function batch_add() {
 			else
 			echo "Skipping, $name already in DB"
 			fi
-		echo "";
+		echo ""
 		done < "$1"
 	fi
+}
+
+function sanitize() {
+	lowercase=$(echo "$1"|tr '[:upper:]' '[:lower:]')
+	trimmed=$(echo "$lowercase"|tr -d '[:blank:]')
+	alpha=$(echo "$trimmed"|tr -cd  '[:alpha:]')
+	echo "$alpha"
 }
 
 function get_names() {
@@ -103,4 +112,4 @@ check_input
 #present_options foo bar
 #read_decision
 
-exit 99
+exit 0
