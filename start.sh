@@ -18,6 +18,10 @@ function check_input() {
 			# Add new name
 			add_name $option
 		;;
+		batchadd)
+			# Add new names from text file
+			batch_add $option
+		;;
 		remove)
 			# Remove name
 			remove_name $option
@@ -53,6 +57,25 @@ function remove_name() {
 	sql "delete from names where name=\"$1\""
 }
 
+function batch_add() {
+	# Add names from file
+	if [ ! -f $1 ]; then
+		echo "File $1 not found!"
+		exit 1
+	else
+		echo "File is $1"
+		while read name; do
+			query=$(sql "select name from names where name=\"$name\"")
+			if [[ -z "$query" ]]; then
+			add_name "$name"
+			else
+			echo "Skipping, $name already in DB"
+			fi
+		echo "";
+		done < "$1"
+	fi
+}
+
 function get_names() {
 	# Gets n Options from the DB
 	echo "Gets n Options from the DB"
@@ -79,3 +102,5 @@ create_db
 check_input
 #present_options foo bar
 #read_decision
+
+exit 99
