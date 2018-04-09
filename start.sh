@@ -33,6 +33,7 @@ function check_input() {
 		start|*)
 			# Start decider
 			echo "start decider"
+			decider
 		;;
 		esac
 }
@@ -90,7 +91,7 @@ function sanitize() {
 
 function get_names() {
 	# Gets n Options from the DB
-	echo "Gets n Options from the DB"
+	echo "Gets $1 options from the DB"
 }
 
 function write_decision() {
@@ -113,9 +114,14 @@ function print_db() {
 	sql "select name,vote,compared from names"
 }
 
+function decider() {
+	name_count="${1:-3}"
+	get_names $name_count
+}
 
 create_db
 check_input
+
 #present_options foo bar
 #read_decision
 
