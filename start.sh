@@ -112,6 +112,8 @@ function read_decision() {
 
 function print_db() {
 	sql "select name,vote,compared from names"
+	echo ""
+	sql "select count(name) from names"
 }
 
 function decider() {
