@@ -43,27 +43,40 @@ function check_input() {
 }
 
 function sql() {
-	sqlite3 -batch -line $db "$@"
+	local query="$2"
+	local mode="$1"
+	local options=''
+
+	case $mode in
+		list)
+		options="-line"
+		;;
+		query)
+		options=""
+		;;
+	esac
+
+	sqlite3 ${options} ${db} "${query}"
 }
 
 function create_db() {
 # Open DB and if it doen't exist, create it
 if [ ! -f $db ]; then
 	echo "Database not found!"
-	sql "create table names (id INTEGER PRIMARY KEY,name TEXT UNIQUE,vote INTEGER,compared INTEGER);"
+	sql query "create table names (id INTEGER PRIMARY KEY,name TEXT UNIQUE,vote INTEGER,compared INTEGER);"
 fi
 }
 
 function add_name() {
 	name=$(sanitize $1)
 	echo "Add Name $name"
-	sql "insert into names (name,vote,compared) values (\"$name\",0,0);"
+	sql query "insert into names (name,vote,compared) values (\"$name\",0,0);"
 }
 
 function remove_name() {
 	name=$(sanitize $1)
 	echo "Remove Name $name"
-	sql "delete from names where name=\"$name\""
+	sql query "delete from names where name=\"$name\""
 }
 
 function batch_add() {
@@ -74,7 +87,7 @@ function batch_add() {
 	else
 		echo "File is $1"
 		while read name; do
-			query=$(sql "select name from names where name=\"$name\"")
+			query=$(sql query "select name from names where name=\"$name\"")
 			if [[ -z "$query" ]]; then
 			add_name "$name"
 			else
@@ -96,7 +109,7 @@ function sanitize() {
 function get_names() {
 	# Gets n Options from the DB
 	echo "Select best option!"
-	sql "select * from names order by random() limit $1";
+	sql list "select * from names order by random() limit $1";
 }
 
 function write_decision() {
@@ -158,9 +171,10 @@ function read_decision() {
 }
 
 function print_db() {
-	sql "select name,vote,compared from names"
+	sql list "select name,vote,compared from names"
 	echo ""
-	sql "select count(name) from names"
+	entries=$(sql query "select count(name) from names")
+	echo "Number of names in database: $entries"
 }
 
 function decider() {
