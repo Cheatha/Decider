@@ -120,13 +120,25 @@ function ask_options() {
 		name_array[$i]="$name"
 	done
 
-#	select_option $name_array[*]
+	read_decision
+	best=${name_array[$decision]}
+	write_decision "$best" "${name_array[*]}"
 }
 
 function write_decision() {
 	# Add deciscion to DB
-	echo "Add deciscion to DB"
+	best="$1"
+	rest="$2"
+	for i in $rest; do
+		if [ "$i" == "$best" ]; then
+			sql query "update names set vote = vote + 1 where name=\"$i\""
+		else
+			sql query "update names set vote = vote - 1 where name=\"$i\""
+		fi
 
+		sql query "update names set compared = compared + 1 where name=\"$i\""
+
+	done
 }
 
 function main_menu() {
