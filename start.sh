@@ -124,6 +124,7 @@ function main_menu() {
 
 	case $decision in
 		1)
+		decider
 		;;
 		2)
 		print_db
@@ -152,8 +153,7 @@ function main_menu() {
 }
 
 function read_decision() {
-	echo ""
-	read -n 1 decision
+	read -s -n 1 decision
 }
 
 function print_db() {
@@ -163,6 +163,7 @@ function print_db() {
 }
 
 function decider() {
+#	clear
 	name_count="${1:-3}"
 	get_names $name_count
 }
