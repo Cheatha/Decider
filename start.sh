@@ -106,21 +106,26 @@ function sanitize() {
 	echo "$capitalize"
 }
 
-function get_names() {
+function ask_options() {
 	# Gets n Options from the DB
 	echo "Select best option!"
-	sql list "select * from names order by random() limit $1";
+	names=$(sql query "select name from names order by random() limit $1")
+	local loop="1"
+	unset name_array
+	declare -a name_array
+	for name in $names;
+	do
+		i=$((loop++))
+		echo "[$i] $name"
+		name_array[$i]="$name"
+	done
+
+#	select_option $name_array[*]
 }
 
 function write_decision() {
 	# Add deciscion to DB
 	echo "Add deciscion to DB"
-
-}
-
-function present_options() {
-	echo "[1] $1"
-	echo "[2] $2"
 
 }
 
@@ -180,13 +185,10 @@ function print_db() {
 function decider() {
 	clear
 	name_count="${1:-3}"
-	get_names $name_count
+	ask_options $name_count
 }
 
 create_db
 check_input
-
-#present_options foo bar
-#read_decision
 
 exit 0
