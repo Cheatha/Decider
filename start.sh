@@ -30,10 +30,14 @@ function check_input() {
 			# Show DB entries
 			print_db
 		;;
-		start|*)
+		start)
 			# Start decider
 			echo "start decider"
 			decider
+		;;
+		*)
+			# Show Main Menu
+			main_menu
 		;;
 		esac
 }
@@ -106,7 +110,49 @@ function present_options() {
 
 }
 
+function main_menu() {
+	echo -e "\n-- Decider Main Menu --"
+	echo "[1] Start decider"
+	echo "[2] Show names"
+	echo "[3] Add new name"
+	echo "[4] Remove name"
+	echo ""
+	echo "[o] Change options"
+	echo "[q] Quit"
+
+	read_decision
+
+	case $decision in
+		1)
+		;;
+		2)
+		print_db
+		;;
+		3)
+		echo -e "\nEnter new name:"
+		read name
+		add_name $name
+		;;
+		4)
+		echo -e "\nName to delete:"
+		read name
+		remove_name $name
+		;;
+		o)
+		;;
+		q)
+		exit 0;
+		;;
+		*)
+		clear
+		;;
+	esac
+
+	main_menu
+}
+
 function read_decision() {
+	echo ""
 	read -n 1 decision
 }
 
