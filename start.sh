@@ -95,7 +95,8 @@ function sanitize() {
 
 function get_names() {
 	# Gets n Options from the DB
-	echo "Gets $1 options from the DB"
+	echo "Select best option!"
+	sql "select * from names order by random() limit $1";
 }
 
 function write_decision() {
@@ -163,7 +164,7 @@ function print_db() {
 }
 
 function decider() {
-#	clear
+	clear
 	name_count="${1:-3}"
 	get_names $name_count
 }
