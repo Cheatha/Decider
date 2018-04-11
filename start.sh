@@ -14,6 +14,8 @@ db="$db_path/$db_name"
 
 # Default settings
 default_name_count="3"
+default_vote_threshold="0" # Vote score an option needs to have to be picked 
+default_compared_threshold="10" # Number of rounds an option needs to have to been picked before vote threshold is counted
 
 # functions
 
@@ -133,9 +135,12 @@ function sanitize() {
 }
 
 function ask_options() {
+    vote_threshold="${global_vote_threshold:-${default_vote_threshold}}"
+    compared_threshold="${global_compared_threshold:-${default_compared_threshold}}"
+
 	# Gets n Options from the DB
 	headline "Select best option!"
-	names=$(sql query "select name from names where vote > 0 or compared < 10 order by random() limit $1")
+	names=$(sql query "select name from names where vote > $vote_threshold or compared < $compared_threshold order by random() limit $1")
 	options_left=$(echo $names|wc -w)
 
 	if [[ "$options_left" == "1" ]]; then
@@ -258,9 +263,14 @@ function decider() {
 
 function change_settings() {
     name_count="${global_name_count:-${default_name_count}}"
+    vote_threshold="${global_vote_threshold:-${default_vote_threshold}}"
+    compared_threshold="${global_compared_threshold:-${default_compared_threshold}}"
+
 
 	headline "Change settings"
-	echo "[1] Default number of voting options: $name_count"
+	echo "[1] Number of voting options: $name_count"
+	echo "[2] Vote threshold: $vote_threshold"
+	echo "[3] Compare threshold: $compared_threshold"
 	echo ""
 	echo -e "[m] Main Menu\n"
 
@@ -275,6 +285,24 @@ function change_settings() {
 			global_name_count="${decision}"
 		else
 			echo "Value must be between 2 and 9!"
+		fi
+		;;
+		2)
+		echo "How many votes needs an option to be picked after it reached the compared threshold?"
+		read decision
+		if [[ "$decision" =~ ^-?[0-9]+$ ]]; then
+			global_vote_threshold="${decision}"
+		else
+			echo "Value must be a number!"
+		fi
+		;;
+		3)
+		echo "How many times must an option have been picked before the vote threshold counts?"
+		read decision
+		if [[ "$decision" =~ ^-?[0-9]+$ ]]; then
+			global_compared_threshold="${decision}"
+		else
+			echo "Value must be a number!"
 		fi
 		;;
 		m)
