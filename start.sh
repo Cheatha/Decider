@@ -120,9 +120,24 @@ function ask_options() {
 		name_array[$i]="$name"
 	done
 
+	echo -e "\n[q] Quit"
+
 	read_decision
-	best=${name_array[$decision]}
-	write_decision "$best" "${name_array[*]}"
+
+	case $decision in
+		q)
+		exit 0;
+		;;
+		[1-$i])
+		best=${name_array[$decision]}
+		write_decision "$best" "${name_array[*]}"
+		;;
+		*)
+		echo "Press Button 1-$i to choose the best option!"
+		sleep 5
+		;;
+	esac
+
 }
 
 function write_decision() {
