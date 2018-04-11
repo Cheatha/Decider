@@ -188,6 +188,7 @@ function main_menu() {
 	echo "[2] Show names"
 	echo "[3] Add new name"
 	echo "[4] Remove name"
+	echo "[5] Show Top 10"
 	echo ""
 	echo "[o] Change settings"
 	echo "[q] Quit"
@@ -210,6 +211,9 @@ function main_menu() {
 		echo -e "\nName to delete:"
 		read name
 		remove_name $name
+		;;
+		5)
+		hiscore
 		;;
 		o)
 		change_settings
