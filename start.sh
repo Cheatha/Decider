@@ -12,6 +12,11 @@ db_name="names.db"
 db_path=$(dirname "$0")
 db="$db_path/$db_name"
 
+# Default settings
+default_name_count="3"
+
+# functions
+
 function check_input() {
 	case $mode in
 		add)
@@ -184,7 +189,7 @@ function main_menu() {
 	echo "[3] Add new name"
 	echo "[4] Remove name"
 	echo ""
-	echo "[o] Change options"
+	echo "[o] Change settings"
 	echo "[q] Quit"
 
 	read_decision
@@ -207,6 +212,7 @@ function main_menu() {
 		remove_name $name
 		;;
 		o)
+		change_settings
 		;;
 		q)
 		exit 0;
@@ -233,9 +239,37 @@ function print_db() {
 
 function decider() {
 	clear
-	name_count="${1:-3}"
+	name_count="${global_name_count:-${default_name_count}}"
 	ask_options $name_count
 	decider
+}
+
+function change_settings() {
+    name_count="${global_name_count:-${default_name_count}}"
+
+	headline "Change settings"
+	echo "[1] Default number of voting options: $name_count"
+	echo ""
+	echo -e "[m] Main Menu\n"
+
+	echo -e "\nSelect setting to change:"
+	read_decision
+
+	case $decision in
+		1)
+		echo "Number of options to choose from?"
+		read_decision
+		if [[ "$decision" =~ ^[2-9]+$ ]]; then
+			global_name_count="${decision}"
+		else
+			echo "Value must be between 2 and 9!"
+		fi
+		;;
+		m)
+		main_menu
+		;;
+	esac
+	change_settings
 }
 
 create_db
