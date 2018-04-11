@@ -35,6 +35,10 @@ function check_input() {
 			echo "start decider"
 			decider
 		;;
+		hiscore)
+			# Show best voted names
+			hiscore
+			;;
 		*)
 			# Show Main Menu
 			main_menu
@@ -45,7 +49,7 @@ function check_input() {
 function sql() {
 	local query="$2"
 	local mode="$1"
-	local options=''
+	local options=""
 
 	case $mode in
 		list)
@@ -54,9 +58,13 @@ function sql() {
 		query)
 		options=""
 		;;
+		column)
+		options="-column -header"
+		;;
 	esac
 
-	sqlite3 ${options} ${db} "${query}"
+	execute="sqlite3 ${options} ${db} \"${query}\""
+	eval $execute
 }
 
 function create_db() {
@@ -77,6 +85,11 @@ function remove_name() {
 	name=$(sanitize $1)
 	echo "Remove Name $name"
 	sql query "delete from names where name=\"$name\""
+}
+
+function hiscore() {
+	echo -e "Top 10 names\n************\n"
+	sql column "select vote, name from names order by vote desc limit 10"
 }
 
 function batch_add() {
