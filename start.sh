@@ -91,18 +91,18 @@ fi
 function add_name() {
 	name=$(sanitize $1)
 	echo "Add Name $name"
-	sql query "insert into names (name,vote,compared) values (\"$name\",0,0);"
+	sql query 'insert into names (name,vote,compared) values ('"'"'$name'"'"',0,0);'
 }
 
 function remove_name() {
 	name=$(sanitize $1)
 	echo "Remove Name $name"
-	sql query "delete from names where name=\"$name\""
+	sql query 'delete from names where name='"'"'$name'"'"''
 }
 
 function hiscore() {
 	headline "Top 10 names"
-	sql column "select vote, name from names order by vote desc limit 10"
+	sql column 'select vote, name from names order by vote desc limit 10'
 }
 
 function batch_add() {
@@ -113,7 +113,7 @@ function batch_add() {
 	else
 		echo "File is $1"
 		while read name; do
-			query=$(sql query "select name from names where name=\"$name\"")
+			query=$(sql query 'select name from names where name='"'"'$name'"'"'')
 			if [[ -z "$query" ]]; then
 			add_name "$name"
 			else
@@ -172,12 +172,12 @@ function write_decision() {
 	rest="$2"
 	for i in $rest; do
 		if [ "$i" == "$best" ]; then
-			sql query "update names set vote = vote + 1 where name=\"$i\""
+			sql query 'update names set vote = vote + 1 where name='"'"'$i'"'"''
 		else
-			sql query "update names set vote = vote - 1 where name=\"$i\""
+			sql query 'update names set vote = vote - 1 where name='"'"'$i'"'"''
 		fi
 
-		sql query "update names set compared = compared + 1 where name=\"$i\""
+		sql query 'update names set compared = compared + 1 where name='"'"'$i'"'"''
 
 	done
 }
