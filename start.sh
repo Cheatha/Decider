@@ -109,7 +109,7 @@ function sanitize() {
 function ask_options() {
 	# Gets n Options from the DB
 	echo "Select best option!"
-	names=$(sql query "select name from names order by random() limit $1")
+	names=$(sql query "select name from names where vote > 0 or compared < 10 order by random() limit $1")
 	local loop="1"
 	unset name_array
 	declare -a name_array
@@ -198,6 +198,7 @@ function decider() {
 	clear
 	name_count="${1:-3}"
 	ask_options $name_count
+	decider
 }
 
 create_db
