@@ -67,6 +67,14 @@ function sql() {
 	eval $execute
 }
 
+function headline() {
+	local text="$1"
+	local text_length="$(echo $text|wc -m)"
+	echo -e "\n$text"
+	seq -s= $text_length|tr -d '[:digit:]'
+	echo ""
+}
+
 function create_db() {
 # Open DB and if it doen't exist, create it
 if [ ! -f $db ]; then
@@ -88,7 +96,7 @@ function remove_name() {
 }
 
 function hiscore() {
-	echo -e "Top 10 names\n************\n"
+	headline "Top 10 names"
 	sql column "select vote, name from names order by vote desc limit 10"
 }
 
@@ -121,7 +129,7 @@ function sanitize() {
 
 function ask_options() {
 	# Gets n Options from the DB
-	echo "Select best option!"
+	headline "Select best option!"
 	names=$(sql query "select name from names where vote > 0 or compared < 10 order by random() limit $1")
 	local loop="1"
 	unset name_array
@@ -170,7 +178,7 @@ function write_decision() {
 }
 
 function main_menu() {
-	echo -e "\n-- Decider Main Menu --"
+	headline "Decider Main Menu"
 	echo "[1] Start decider"
 	echo "[2] Show names"
 	echo "[3] Add new name"
@@ -216,6 +224,7 @@ function read_decision() {
 }
 
 function print_db() {
+	headline "Database content"
 	sql list "select name,vote,compared from names"
 	echo ""
 	entries=$(sql query "select count(name) from names")
