@@ -91,7 +91,13 @@ fi
 function add_name() {
 	name=$(sanitize $1)
 	echo "Add Name $name"
-	sql query 'insert into names (name,vote,compared) values ('"'"'$name'"'"',0,0);'
+
+	query=$(sql query 'select name from names where name='"'"'$name'"'"'')
+	if [[ -z "$query" ]]; then
+		sql query 'insert into names (name,vote,compared) values ('"'"'$name'"'"',0,0);'
+	else
+		echo "Skipping, $name already in DB"
+	fi
 }
 
 function remove_name() {
@@ -113,13 +119,7 @@ function batch_add() {
 	else
 		echo "File is $1"
 		while read name; do
-			query=$(sql query 'select name from names where name='"'"'$name'"'"'')
-			if [[ -z "$query" ]]; then
 			add_name "$name"
-			else
-			echo "Skipping, $name already in DB"
-			fi
-		echo ""
 		done < "$1"
 	fi
 }
