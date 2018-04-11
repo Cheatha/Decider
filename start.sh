@@ -136,6 +136,14 @@ function ask_options() {
 	# Gets n Options from the DB
 	headline "Select best option!"
 	names=$(sql query "select name from names where vote > 0 or compared < 10 order by random() limit $1")
+	options_left=$(echo $names|wc -w)
+
+	if [[ "$options_left" == "1" ]]; then
+		echo "Option $names has won!"
+		hiscore
+		exit 0
+	fi
+
 	local loop="1"
 	unset name_array
 	declare -a name_array
