@@ -125,13 +125,17 @@ function ask_options() {
 		option_array[$i]="$option"
 	done
 
-	echo -e "\n[q] Quit"
+	echo -e "\n[m] Main menu"
+	echo -e "[q] Quit"
 
 	read_decision
 
 	case $decision in
 		q)
 		exit 0;
+		;;
+		m)
+		main_menu
 		;;
 		[1-$i])
 		best=${option_array[$decision]}
