@@ -61,6 +61,7 @@ function main_menu() {
 	echo "[3] Add new option"
 	echo "[4] Remove option"
 	echo "[5] Show Top 10"
+	echo "[6] Show Bottom 10"
 	echo ""
 	echo "[o] Change settings"
 	echo "[q] Quit"
@@ -86,6 +87,9 @@ function main_menu() {
 		;;
 		5)
 		hiscore
+		;;
+		6)
+		hiscore asc
 		;;
 		o)
 		change_settings
@@ -259,8 +263,17 @@ function remove_option() {
 }
 
 function hiscore() {
-	headline "Top 10 options"
-	sql column 'select vote, option from options order by vote desc limit 10'
+	orderby="${1:-desc}"
+
+	if [[ "$orderby" == "desc" ]]; then
+		headline "Top 10 options"
+		echo -e "Best voted options\n"
+	else
+		headline "Bottom 10 option"
+		echo -e "Worst voted options\n"
+	fi
+
+	sql column "select vote,option,compared from options order by vote $orderby limit 10"
 }
 
 function batch_add() {
