@@ -1,2 +1,4 @@
 *.swp
 *.tmp
+*.db
+*.txt
