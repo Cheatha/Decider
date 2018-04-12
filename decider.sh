@@ -13,6 +13,7 @@ db_path=$(dirname "$0")
 db="$db_path/$db_name"
 
 # Default settings
+default_allow_skip="Off" # Allow or disallow skipping of all options
 default_option_count="3"
 default_vote_threshold="0" # Vote score an option needs to have to be picked 
 default_compared_threshold="10" # Number of rounds an option needs to have to been picked before vote threshold is counted
@@ -103,6 +104,7 @@ function main_menu() {
 function ask_options() {
     vote_threshold="${global_vote_threshold:-${default_vote_threshold}}"
     compared_threshold="${global_compared_threshold:-${default_compared_threshold}}"
+    allow_skip="${global_allow_skip:-${default_allow_skip}}"
 
 	# Gets n Options from the DB
 	headline "Select best option!"
@@ -125,6 +127,9 @@ function ask_options() {
 		option_array[$i]="$option"
 	done
 
+	if [[ "$allow_skip" == "On" ]]; then
+		echo -e "\n[x] Skip and downvote all"
+	fi
 	echo -e "\n[m] Main menu"
 	echo -e "[q] Quit"
 
@@ -133,6 +138,9 @@ function ask_options() {
 	case $decision in
 		q)
 		exit 0;
+		;;
+		x)
+		write_decision "SKIP" "${option_array[*]}"
 		;;
 		m)
 		main_menu
@@ -186,14 +194,13 @@ function write_decision() {
 	best="$1"
 	rest="$2"
 	for i in $rest; do
-		if [ "$i" == "$best" ]; then
+		if [[ "$i" == "$best" ]]; then
 			sql query 'update options set vote = vote + 1 where option='"'$i'"''
 		else
 			sql query 'update options set vote = vote - 1 where option='"'$i'"''
 		fi
 
 		sql query 'update options set compared = compared + 1 where option='"'$i'"''
-
 	done
 }
 
@@ -274,6 +281,7 @@ function print_db() {
 }
 
 function change_settings() {
+    allow_skip="${global_allow_skip:-${default_allow_skip}}"
     option_count="${global_option_count:-${default_option_count}}"
     vote_threshold="${global_vote_threshold:-${default_vote_threshold}}"
     compared_threshold="${global_compared_threshold:-${default_compared_threshold}}"
@@ -283,6 +291,7 @@ function change_settings() {
 	echo "[1] Number of voting options: $option_count"
 	echo "[2] Vote threshold: $vote_threshold"
 	echo "[3] Compare threshold: $compared_threshold"
+	echo "[4] Allow skipping: $allow_skip"
 	echo ""
 	echo -e "[m] Main Menu\n"
 
@@ -315,6 +324,17 @@ function change_settings() {
 			global_compared_threshold="${decision}"
 		else
 			echo "Value must be a number!"
+		fi
+		;;
+		4)
+		echo "Allow skipping of options? Skipping will downvote all presented options."
+		echo "[1] Skipping Off"
+		echo "[2] Skipping On"
+		read_decision
+		if [[ "$decision" = "2" ]]; then
+			global_allow_skip="On"
+		else
+			global_allow_skip="Off"
 		fi
 		;;
 		m)
