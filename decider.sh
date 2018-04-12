@@ -209,7 +209,7 @@ function sanitize() {
 	trimmed=$(echo "$lowercase"|tr -d '[:blank:]')
 	alpha=$(echo "$trimmed"|tr -cd  '[:alpha:]')
 	capitalize="$(tr '[:lower:]' '[:upper:]' <<< \"${alpha:0:1})${alpha:1}\""
-	echo "$capitalize"
+	echo "${capitalize}"
 }
 
 function read_decision() {
@@ -230,7 +230,7 @@ function add_option() {
 	echo "Add option $option"
 
 	query=$(sql query 'select option from options where option='"'$option'"'')
-	if [[ -z "$query" ]]; then
+	if [[ -z "$query" && ${#option} -ge 3 ]]; then
 		sql query 'insert into options (option,vote,compared) values ('"'$option'"',0,0);'
 	else
 		echo "Skipping, $option already in DB"
