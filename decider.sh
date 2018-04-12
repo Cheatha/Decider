@@ -263,7 +263,7 @@ function batch_add() {
 
 function print_db() {
 	headline "Database content"
-	sql list "select option,vote,compared from options"
+	sql column "select option,vote,compared from options"
 	echo ""
 	entries=$(sql query "select count(option) from options")
 	echo "Number of options in database: $entries"
