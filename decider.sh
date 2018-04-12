@@ -106,15 +106,19 @@ function ask_options() {
     compared_threshold="${global_compared_threshold:-${default_compared_threshold}}"
     allow_skip="${global_allow_skip:-${default_allow_skip}}"
 
+	options=$(sql query "select option from options where vote > $vote_threshold or compared < $compared_threshold order by random() limit $1")
+	possible_options=$(sql query "select option from options where vote > $vote_threshold or compared < $compared_threshold")
+	possible_options_left=$(echo "$possible_options"|wc -w)
+
 	# Gets n Options from the DB
 	headline "Select best option!"
-	options=$(sql query "select option from options where vote > $vote_threshold or compared < $compared_threshold order by random() limit $1")
-	options_left=$(echo "$options"|wc -w)
 
-	if [[ "$options_left" == "1" ]]; then
+	if [[ "$possible_options_left" == "1" ]]; then
 		echo "Option $options has won!"
 		hiscore
 		exit 0
+	else
+		echo -e "There are $possible_options_left options left to choose from.\n"
 	fi
 
 	local loop="1"
