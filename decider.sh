@@ -8,12 +8,12 @@ mode=${1:-alpha}
 option=${2:-alpha}
 
 # Config
-db_name="names.db"
+db_name="options.db"
 db_path=$(dirname "$0")
 db="$db_path/$db_name"
 
 # Default settings
-default_name_count="3"
+default_option_count="3"
 default_vote_threshold="0" # Vote score an option needs to have to be picked 
 default_compared_threshold="10" # Number of rounds an option needs to have to been picked before vote threshold is counted
 
@@ -23,16 +23,16 @@ default_compared_threshold="10" # Number of rounds an option needs to have to be
 function check_input() {
 	case $mode in
 		add)
-			# Add new name
-			add_name $option
+			# Add new option to DB
+			add_option $option
 		;;
 		batchadd)
-			# Add new names from text file
+			# Add new options from text file
 			batch_add $option
 		;;
 		remove)
-			# Remove name
-			remove_name $option
+			# Remove option from DB
+			remove_option $option
 		;;
 		print)
 			# Show DB entries
@@ -40,11 +40,10 @@ function check_input() {
 		;;
 		start)
 			# Start decider
-			echo "start decider"
 			decider
 		;;
 		hiscore)
-			# Show best voted names
+			# Show best voted options
 			hiscore
 			;;
 		*)
@@ -57,9 +56,9 @@ function check_input() {
 function main_menu() {
 	headline "Decider Main Menu"
 	echo "[1] Start decider"
-	echo "[2] Show names"
-	echo "[3] Add new name"
-	echo "[4] Remove name"
+	echo "[2] Show options"
+	echo "[3] Add new option"
+	echo "[4] Remove option"
 	echo "[5] Show Top 10"
 	echo ""
 	echo "[o] Change settings"
@@ -75,14 +74,14 @@ function main_menu() {
 		print_db
 		;;
 		3)
-		echo -e "\nEnter new name:"
-		read name
-		add_name $name
+		echo -e "\nEnter new option:"
+		read option
+		add_option $option
 		;;
 		4)
-		echo -e "\nName to delete:"
-		read name
-		remove_name $name
+		echo -e "\nOption to delete:"
+		read option
+		remove_option $option
 		;;
 		5)
 		hiscore
@@ -107,23 +106,23 @@ function ask_options() {
 
 	# Gets n Options from the DB
 	headline "Select best option!"
-	names=$(sql query "select name from names where vote > $vote_threshold or compared < $compared_threshold order by random() limit $1")
-	options_left=$(echo $names|wc -w)
+	options=$(sql query "select option from options where vote > $vote_threshold or compared < $compared_threshold order by random() limit $1")
+	options_left=$(echo $options|wc -w)
 
 	if [[ "$options_left" == "1" ]]; then
-		echo "Option $names has won!"
+		echo "Option $options has won!"
 		hiscore
 		exit 0
 	fi
 
 	local loop="1"
-	unset name_array
-	declare -a name_array
-	for name in $names;
+	unset option_array
+	declare -a option_array
+	for option in $options;
 	do
 		i=$((loop++))
-		echo "[$i] $name"
-		name_array[$i]="$name"
+		echo "[$i] $option"
+		option_array[$i]="$option"
 	done
 
 	echo -e "\n[q] Quit"
@@ -135,8 +134,8 @@ function ask_options() {
 		exit 0;
 		;;
 		[1-$i])
-		best=${name_array[$decision]}
-		write_decision "$best" "${name_array[*]}"
+		best=${option_array[$decision]}
+		write_decision "$best" "${option_array[*]}"
 		;;
 		*)
 		echo "Press Button 1-$i to choose the best option!"
@@ -153,7 +152,7 @@ function create_db() {
 # Open DB and if it doen't exist, create it
 if [ ! -f $db ]; then
 	echo "Database not found!"
-	sql query "create table names (id INTEGER PRIMARY KEY,name TEXT UNIQUE,vote INTEGER,compared INTEGER);"
+	sql query "create table options (id INTEGER PRIMARY KEY,option TEXT UNIQUE,vote INTEGER,compared INTEGER);"
 fi
 }
 
@@ -184,12 +183,12 @@ function write_decision() {
 	rest="$2"
 	for i in $rest; do
 		if [ "$i" == "$best" ]; then
-			sql query 'update names set vote = vote + 1 where name='"'"'$i'"'"''
+			sql query 'update options set vote = vote + 1 where option='"'"'$i'"'"''
 		else
-			sql query 'update names set vote = vote - 1 where name='"'"'$i'"'"''
+			sql query 'update options set vote = vote - 1 where option='"'"'$i'"'"''
 		fi
 
-		sql query 'update names set compared = compared + 1 where name='"'"'$i'"'"''
+		sql query 'update options set compared = compared + 1 where option='"'"'$i'"'"''
 
 	done
 }
@@ -220,63 +219,63 @@ function read_decision() {
 
 function decider() {
 	clear
-	name_count="${global_name_count:-${default_name_count}}"
-	ask_options $name_count
+	option_count="${global_option_count:-${default_option_count}}"
+	ask_options $option_count
 	decider
 }
 
-function add_name() {
-	name=$(sanitize $1)
-	echo "Add Name $name"
+function add_option() {
+	option=$(sanitize $1)
+	echo "Add option $option"
 
-	query=$(sql query 'select name from names where name='"'"'$name'"'"'')
+	query=$(sql query 'select option from options where option='"'"'$option'"'"'')
 	if [[ -z "$query" ]]; then
-		sql query 'insert into names (name,vote,compared) values ('"'"'$name'"'"',0,0);'
+		sql query 'insert into options (option,vote,compared) values ('"'"'$option'"'"',0,0);'
 	else
-		echo "Skipping, $name already in DB"
+		echo "Skipping, $option already in DB"
 	fi
 }
 
-function remove_name() {
-	name=$(sanitize $1)
-	echo "Remove Name $name"
-	sql query 'delete from names where name='"'"'$name'"'"''
+function remove_option() {
+	option=$(sanitize $1)
+	echo "Remove option $option"
+	sql query 'delete from options where option='"'"'$option'"'"''
 }
 
 function hiscore() {
-	headline "Top 10 names"
-	sql column 'select vote, name from names order by vote desc limit 10'
+	headline "Top 10 options"
+	sql column 'select vote, option from options order by vote desc limit 10'
 }
 
 function batch_add() {
-	# Add names from file
+	# Add options from file
 	if [ ! -f $1 ]; then
 		echo "File $1 not found!"
 		exit 1
 	else
 		echo "File is $1"
-		while read name; do
-			add_name "$name"
+		while read option; do
+			add_option "$option"
 		done < "$1"
 	fi
 }
 
 function print_db() {
 	headline "Database content"
-	sql list "select name,vote,compared from names"
+	sql list "select option,vote,compared from options"
 	echo ""
-	entries=$(sql query "select count(name) from names")
-	echo "Number of names in database: $entries"
+	entries=$(sql query "select count(option) from options")
+	echo "Number of options in database: $entries"
 }
 
 function change_settings() {
-    name_count="${global_name_count:-${default_name_count}}"
+    option_count="${global_option_count:-${default_option_count}}"
     vote_threshold="${global_vote_threshold:-${default_vote_threshold}}"
     compared_threshold="${global_compared_threshold:-${default_compared_threshold}}"
 
 
 	headline "Change settings"
-	echo "[1] Number of voting options: $name_count"
+	echo "[1] Number of voting options: $option_count"
 	echo "[2] Vote threshold: $vote_threshold"
 	echo "[3] Compare threshold: $compared_threshold"
 	echo ""
@@ -290,7 +289,7 @@ function change_settings() {
 		echo "Number of options to choose from?"
 		read_decision
 		if [[ "$decision" =~ ^[2-9]+$ ]]; then
-			global_name_count="${decision}"
+			global_option_count="${decision}"
 		else
 			echo "Value must be between 2 and 9!"
 		fi
