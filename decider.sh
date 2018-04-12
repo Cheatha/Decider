@@ -4,8 +4,8 @@
 set -euo pipefail
 IFS=$'\n\t'
 
-mode=${1:-alpha}
-option=${2:-alpha}
+mode="${1:-alpha}"
+option="${2:-alpha}"
 
 # Config
 db_name="options.db"
@@ -24,15 +24,15 @@ function check_input() {
 	case $mode in
 		add)
 			# Add new option to DB
-			add_option $option
+			add_option "$option"
 		;;
 		batchadd)
 			# Add new options from text file
-			batch_add $option
+			batch_add "$option"
 		;;
 		remove)
 			# Remove option from DB
-			remove_option $option
+			remove_option "$option"
 		;;
 		print)
 			# Show DB entries
@@ -75,13 +75,13 @@ function main_menu() {
 		;;
 		3)
 		echo -e "\nEnter new option:"
-		read option
-		add_option $option
+		read -r option
+		add_option "$option"
 		;;
 		4)
 		echo -e "\nOption to delete:"
-		read option
-		remove_option $option
+		read -r option
+		remove_option "$option"
 		;;
 		5)
 		hiscore
@@ -107,7 +107,7 @@ function ask_options() {
 	# Gets n Options from the DB
 	headline "Select best option!"
 	options=$(sql query "select option from options where vote > $vote_threshold or compared < $compared_threshold order by random() limit $1")
-	options_left=$(echo $options|wc -w)
+	options_left=$(echo "$options"|wc -w)
 
 	if [[ "$options_left" == "1" ]]; then
 		echo "Option $options has won!"
@@ -150,7 +150,7 @@ function ask_options() {
 
 function create_db() {
 # Open DB and if it doen't exist, create it
-if [ ! -f $db ]; then
+if [ ! -f "$db" ]; then
 	echo "Database not found!"
 	sql query "create table options (id INTEGER PRIMARY KEY,option TEXT UNIQUE,vote INTEGER,compared INTEGER);"
 fi
@@ -174,7 +174,7 @@ function sql() {
 	esac
 
 	execute="sqlite3 ${options} ${db} \"${query}\""
-	eval $execute
+	eval "$execute"
 }
 
 function write_decision() {
@@ -183,12 +183,12 @@ function write_decision() {
 	rest="$2"
 	for i in $rest; do
 		if [ "$i" == "$best" ]; then
-			sql query 'update options set vote = vote + 1 where option='"'"'$i'"'"''
+			sql query 'update options set vote = vote + 1 where option='"'$i'"''
 		else
-			sql query 'update options set vote = vote - 1 where option='"'"'$i'"'"''
+			sql query 'update options set vote = vote - 1 where option='"'$i'"''
 		fi
 
-		sql query 'update options set compared = compared + 1 where option='"'"'$i'"'"''
+		sql query 'update options set compared = compared + 1 where option='"'$i'"''
 
 	done
 }
@@ -197,9 +197,10 @@ function write_decision() {
 
 function headline() {
 	local text="$1"
-	local text_length="$(echo $text|wc -m)"
+	local text_length
+	text_length="$(echo \"${text}\"|wc -m)"
 	echo -e "\n$text"
-	seq -s= $text_length|tr -d '[:digit:]'
+	seq -s= "$text_length"|tr -d '[:digit:]'
 	echo ""
 }
 
@@ -207,12 +208,12 @@ function sanitize() {
 	lowercase=$(echo "$1"|tr '[:upper:]' '[:lower:]')
 	trimmed=$(echo "$lowercase"|tr -d '[:blank:]')
 	alpha=$(echo "$trimmed"|tr -cd  '[:alpha:]')
-	capitalize="$(tr '[:lower:]' '[:upper:]' <<< ${alpha:0:1})${alpha:1}"
+	capitalize="$(tr '[:lower:]' '[:upper:]' <<< \"${alpha:0:1})${alpha:1}\""
 	echo "$capitalize"
 }
 
 function read_decision() {
-	read -s -n 1 decision
+	read -r -s -n 1 decision
 }
 
 # Program modes
@@ -220,26 +221,26 @@ function read_decision() {
 function decider() {
 	clear
 	option_count="${global_option_count:-${default_option_count}}"
-	ask_options $option_count
+	ask_options "$option_count"
 	decider
 }
 
 function add_option() {
-	option=$(sanitize $1)
+	option=$(sanitize "$1")
 	echo "Add option $option"
 
-	query=$(sql query 'select option from options where option='"'"'$option'"'"'')
+	query=$(sql query 'select option from options where option='"'$option'"'')
 	if [[ -z "$query" ]]; then
-		sql query 'insert into options (option,vote,compared) values ('"'"'$option'"'"',0,0);'
+		sql query 'insert into options (option,vote,compared) values ('"'$option'"',0,0);'
 	else
 		echo "Skipping, $option already in DB"
 	fi
 }
 
 function remove_option() {
-	option=$(sanitize $1)
+	option=$(sanitize "$1")
 	echo "Remove option $option"
-	sql query 'delete from options where option='"'"'$option'"'"''
+	sql query 'delete from options where option='"'$option'"''
 }
 
 function hiscore() {
@@ -249,12 +250,12 @@ function hiscore() {
 
 function batch_add() {
 	# Add options from file
-	if [ ! -f $1 ]; then
+	if [ ! -f "$1" ]; then
 		echo "File $1 not found!"
 		exit 1
 	else
 		echo "File is $1"
-		while read option; do
+		while read -r option; do
 			add_option "$option"
 		done < "$1"
 	fi
@@ -296,7 +297,7 @@ function change_settings() {
 		;;
 		2)
 		echo "How many votes needs an option to be picked after it reached the compared threshold?"
-		read decision
+		read -r decision
 		if [[ "$decision" =~ ^-?[0-9]+$ ]]; then
 			global_vote_threshold="${decision}"
 		else
@@ -305,7 +306,7 @@ function change_settings() {
 		;;
 		3)
 		echo "How many times must an option have been picked before the vote threshold counts?"
-		read decision
+		read -r decision
 		if [[ "$decision" =~ ^-?[0-9]+$ ]]; then
 			global_compared_threshold="${decision}"
 		else
