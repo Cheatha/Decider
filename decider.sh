@@ -21,6 +21,13 @@ default_compared_threshold="10" # Number of rounds an option needs to have to be
 ### Functions
 # program flow functions
 
+function check_dependencies() {
+command -v sqlite3 >/dev/null 2>&1 || {
+	echo >&2 "sqlite3 is required, but it's not installed.  Aborting.";
+	exit 1;
+	}
+}
+
 function check_input() {
 	case $mode in
 		add)
@@ -361,6 +368,7 @@ function change_settings() {
 	change_settings
 }
 
+check_dependencies
 create_db
 check_input
 
